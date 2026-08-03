@@ -1,8 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import CreateOrganizationView from '../views/CreateOrganizationView.vue'
 import DashboardView from '../views/DashboardView.vue'
 import LoginView from '../views/LoginView.vue'
-import RegisterView from '../views/RegisterView.vue'
 import NotFoundView from '../views/NotFoundView.vue'
+import OrganizationMembersView from '../views/OrganizationMembersView.vue'
+import RegisterView from '../views/RegisterView.vue'
 
 const routes = [
     {
@@ -26,11 +28,28 @@ const routes = [
         },
     },
     {
+        path: '/organizations/create',
+        name: 'organization-create',
+        component: CreateOrganizationView,
+        meta: {
+            requiresAuth: true,
+        },
+    },
+    {
         path: '/dashboard',
         name: 'dashboard',
         component: DashboardView,
         meta: {
             requiresAuth: true,
+        },
+    },
+    {
+        path: '/organization/members',
+        name: 'organization-members',
+        component: OrganizationMembersView,
+        meta: {
+            requiresAuth: true,
+            requiresOrganization: true,
         },
     },
     {
@@ -47,6 +66,8 @@ const router = createRouter({
 
 router.beforeEach((to) => {
     const token = localStorage.getItem('access_token')
+    const organizationId =
+        localStorage.getItem('organization_id')
 
     if (to.meta.requiresAuth && !token) {
         return {
@@ -60,6 +81,15 @@ router.beforeEach((to) => {
     if (to.meta.guestOnly && token) {
         return {
             name: 'dashboard',
+        }
+    }
+
+    if (
+        to.meta.requiresOrganization &&
+        !organizationId
+    ) {
+        return {
+            name: 'organization-create',
         }
     }
 
