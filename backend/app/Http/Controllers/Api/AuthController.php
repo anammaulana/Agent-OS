@@ -56,6 +56,15 @@ class AuthController extends Controller
 
         $token = $user->createToken('web-app')->plainTextToken;
 
+        $user->load([
+            'organizations' => function ($query): void {
+                $query
+                    ->wherePivot('status', 'active')
+                    ->where('organizations.status', 'active')
+                    ->orderBy('organizations.name');
+            },
+        ]);
+
         return response()->json([
             'message' => 'Login berhasil.',
             'data' => [
@@ -63,6 +72,7 @@ class AuthController extends Controller
                 'token' => $token,
             ],
         ]);
+
     }
 
     public function me(Request $request): JsonResponse
