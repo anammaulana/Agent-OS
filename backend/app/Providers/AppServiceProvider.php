@@ -9,9 +9,9 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->singleton(
+        $this->app->scoped(
             TenantContext::class,
-            fn (): TenantContext => new TenantContext()
+             fn(): TenantContext => new TenantContext()
         );
     }
 

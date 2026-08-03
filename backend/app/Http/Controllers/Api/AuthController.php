@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use App\Support\Http\ApiResponse;
 
 class AuthController extends Controller
 {
@@ -23,13 +24,7 @@ class AuthController extends Controller
 
         $token = $user->createToken('web-app')->plainTextToken;
 
-        return response()->json([
-            'message' => 'Registrasi berhasil.',
-            'data' => [
-                'user' => $user,
-                'token' => $token,
-            ],
-        ], 201);
+        return ApiResponse::created(data: ['user' => $user, 'token' => $token,], message: 'Registrasi berhasil.');
     }
 
     /**
@@ -65,29 +60,23 @@ class AuthController extends Controller
             },
         ]);
 
-        return response()->json([
-            'message' => 'Login berhasil.',
-            'data' => [
-                'user' => $user,
-                'token' => $token,
-            ],
-        ]);
-
+        return ApiResponse::success(data: ['user' => $user, 'token' => $token,], message: 'Login berhasil.');
     }
 
     public function me(Request $request): JsonResponse
     {
-        return response()->json([
-            'data' => $request->user(),
-        ]);
+        return ApiResponse::success(data: $request->user(), message: 'Profil berhasil diambil.');
     }
 
     public function logout(Request $request): JsonResponse
     {
-        $request->user()->currentAccessToken()?->delete();
+        $request->user()?->currentAccessToken()?->delete();
+        return ApiResponse::success(message: 'Logout berhasil.');
+    }
 
-        return response()->json([
-            'message' => 'Logout berhasil.',
-        ]);
+    public function logoutAll(Request $request): JsonResponse
+    {
+        $request->user()->tokens()->delete();
+        return ApiResponse::success(message: 'Semua sesi berhasil dikeluarkan.');
     }
 }
